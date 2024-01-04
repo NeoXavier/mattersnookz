@@ -5,7 +5,12 @@ class Cue{
         this.y = y;
         this.length = 100;
         this.width = 10;
-        var options = {
+        this.inWorld ;
+
+
+        this.options = {
+            label: "cue",
+            isSensor: true,
             render: {
                 fillStyle: "#41230e"
             },
@@ -14,26 +19,37 @@ class Cue{
                 mask:0x0002 | 0x0008 
             }
         };
-        this.cue = Bodies.rectangle(this.x - (this.length/2)-(BALLDIA/2), this.y, this.length, this.width, options);
-        console.log(this.cue)
-        var cueBallConstraint = Constraint.create({
+        this.add(this.x, this.y);
+    }
+    
+    draw(){
+        if (this.inWorld){
+            fill(this.cueBody.render.fillStyle);
+            drawVertices(this.cueBody.vertices);
+        }
+    }
+
+    remove(){
+        World.remove(engine.world, [this.cueBody, this.cueConstraint]);
+        this.inWorld = false;
+    }
+
+    // x, y are the center of the cue ball
+    add(x, y){
+        this.cueBody = Bodies.rectangle(x - (this.length/2)-(BALLDIA/2)-1, y, this.length, this.width, this.options);
+        this.cueConstraint = Constraint.create({
             pointA:{
-                x: this.x,
-                y: this.y
+                x: x,
+                y: y
             },
-            bodyB: this.cue,
+            bodyB: this.cueBody,
             pointB: {
                 x: this.length/2,
                 y: 0
             },
-            stiffness: 0.8,
-            damping: 0.2,
+            stiffness: 0.2,
         });
-        World.add(engine.world, [this.cue, cueBallConstraint]);
-    }
-    
-    draw(){
-        fill(this.cue.render.fillStyle);
-        drawVertices(this.cue.vertices);
+        this.inWorld = true;
+        World.add(engine.world, [this.cueBody, this.cueConstraint]); 
     }
 }
