@@ -50,9 +50,10 @@ function setup() {
     engine = Engine.create();
     engine.world.gravity.y = 0;
 
+    const centerX = width / 2;
+    const centerY = height / 2;
 
-    var centerX = width / 2;
-    var centerY = height / 2;
+    UI_setup();
 
     initMouseConstraint();
 
@@ -60,13 +61,13 @@ function setup() {
     table = new Table(centerX, centerY);
 
     // Create Balls
-    cueBall = new Ball((centerX) - (0.35 * TABLEWIDTH), centerY,  BALLDIA / 2, "cue ball", "white", CUEBALL, CUE)
+    cueBall = new Ball((centerX) - (0.35 * TABLEWIDTH), centerY, BALLDIA / 2, "cue ball", "white", CUEBALL, CUE)
 
-    var redsStartingX = (centerX)+ (TABLEWIDTH / 4) + BALLDIA + 2;
+    var redsStartingX = (centerX) + (TABLEWIDTH / 4) + BALLDIA + 2;
     redBalls = make_red_balls(redsStartingX, centerY);
 
     coloredBalls = make_colored_balls(centerX, centerY);
-    
+
     // Create Cue
     cue = new Cue(cueBall.body.position.x, cueBall.body.position.y);
 
@@ -91,6 +92,18 @@ function draw() {
 //////////////////////////////////////
 /// Sequential Execution Functions ///
 //////////////////////////////////////
+
+// Sets up the UI elements
+function UI_setup() {
+    var title = createElement('h2', 'Game Modes:');
+    title.position(10, 0);
+    var buttons = ["Normal", "Random Red", "All Random"]
+    buttons.forEach((buttonName, index) => {
+        let button = createButton(buttonName);
+        button.position(10, 50 + (index * 40));
+        button.mousePressed(() => changeGameModes(buttonName));
+    });
+}
 
 // Creates a mouse constraint for the user to move the cue / cueball
 function initMouseConstraint() {
@@ -120,7 +133,7 @@ function cueBallVelChecker() {
 }
 
 // Allows the user to move the cue ball with the mouse
-function cueBallFree(){
+function cueBallFree() {
     freeCueBall = true;
     // Mouse able to move cue ball
     cueBall.body.collisionFilter.mask |= MOUSE;
@@ -134,27 +147,27 @@ function cueBallFree(){
 
 
 // Decision tree for different balls entering pockets
-function ball_pocket_collision(ball){
-    if(ball.label.includes("cue")){
+function ball_pocket_collision(ball) {
+    if (ball.label.includes("cue")) {
         cueBallFree(); // Free cue ball
-        Body.setVelocity(ball, {x: 0, y: 0});
+        Body.setVelocity(ball, { x: 0, y: 0 });
         Body.setPosition(ball, {
             x: cueBall.originalPos.x,
             y: cueBall.originalPos.y
         });
     }
-    else if(ball.label.includes("color")){
-        let coloredBall = coloredBalls.find(b => b.body == ball); 
-        Body.setVelocity(ball, {x: 0, y: 0});
+    else if (ball.label.includes("color")) {
+        let coloredBall = coloredBalls.find(b => b.body == ball);
+        Body.setVelocity(ball, { x: 0, y: 0 });
         Body.setPosition(ball, {
             x: coloredBall.originalPos.x,
             y: coloredBall.originalPos.y
         });
-        if(lastPocketedBall.includes("color")){
+        if (lastPocketedBall.includes("color")) {
             alert("Mistake: Two consecutive colored balls pocketed");
         }
     }
-    else{
+    else {
         var redBall = redBalls.find(b => b.body == ball);
         redBall.remove();
     }
@@ -163,8 +176,8 @@ function ball_pocket_collision(ball){
 
 // Function to apply force before engine updates as forces are cleared after each Engine.update
 // As such placing applyForce in collisionHandler does not work
-function apply_cached_forces(){
-    if (cueBallCache.cueBall){
+function apply_cached_forces() {
+    if (cueBallCache.cueBall) {
         Body.applyForce(cueBallCache.cueBall, cueBallCache.cueBall.position, cueBallCache.force);
         cueBallCache = {};
 
@@ -187,26 +200,26 @@ function collisionHandler(event) {
         // When cue hits cue ball
         if (bodyA.label == "cue" || bodyB.label == "cue") {
             //let mappedSpeed = map(Body.getSpeed(cue.cueBody), 0, 50, 0, 0.005);
-            let adjustedSpeed = Body.getSpeed(cue.cueBody) / 15000;
+            let adjustedSpeed = Body.getSpeed(cue.cueBody) / 20000;
             let cueAngle = cue.cueBody.angle;
             let force = p5.Vector.fromAngle(cueAngle).setMag(adjustedSpeed);
-            cueBallCache = {cueBall: cueBall.body, force: {x: force.x, y: force.y}};
+            cueBallCache = { cueBall: cueBall.body, force: { x: force.x, y: force.y } };
         }
 
         // When a ball collides with a pocket or vice versa
-        if(bodyA.label.includes("ball") && bodyB.label == "pocketSensor"){ ball_pocket_collision(bodyA); }
-        if(bodyB.label.includes("ball") && bodyA.label == "pocketSensor"){ ball_pocket_collision(bodyB); }
+        if (bodyA.label.includes("ball") && bodyB.label == "pocketSensor") { ball_pocket_collision(bodyA); }
+        if (bodyB.label.includes("ball") && bodyA.label == "pocketSensor") { ball_pocket_collision(bodyB); }
 
     })
 }
 
 
-function mouseDragHandler(event){
+function mouseDragHandler(event) {
     console.log("mouse dragged");
     const { body } = event;
 
     // if mouse draged on cue ball
-    if (body.label == "cue ball"){
+    if (body.label == "cue ball") {
         freeCueBall = false;
         // Mouse no longer able to move cue ball
         mouseConstraint.collisionFilter.mask &= ~CUEBALL;
@@ -220,6 +233,22 @@ function mouseDragHandler(event){
     }
 }
 
+function changeGameModes(mode) {
+    switch (mode) {
+        case "Normal":
+            balls_to_original_pos();
+            break;
+        case "Random Red":
+            randomize_balls("red");
+            break;
+        case "All Random":
+            randomize_balls("all");
+            break;
+        default:
+            break;
+    }
+}
+
 // HELPER FUNCTIONS
 function drawVertices(vertices) {
     beginShape();
@@ -230,8 +259,8 @@ function drawVertices(vertices) {
 }
 
 // draws an array of matter.js bodies
-function draw_bodies(arr){
-    for(var i = 0; i < arr.length; i++){
+function draw_bodies(arr) {
+    for (var i = 0; i < arr.length; i++) {
         fill(arr[i].render.fillStyle);
         drawVertices(arr[i].vertices);
     }

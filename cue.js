@@ -52,7 +52,7 @@ class Cue{
                 x: this.length/2,
                 y: 0
             },
-            stiffness: 0.35,
+            stiffness: 0.2,
         });
         this.inWorld = true;
         World.add(engine.world, [this.cueBody, this.cueConstraint]); 

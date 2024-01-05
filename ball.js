@@ -1,5 +1,5 @@
 class Ball {
-    constructor(x, y, radius, label, color, category, mask = CUEBALL ) {
+    constructor(x, y, radius, label, color, category, mask = CUEBALL) {
         this.originalPos = { x: x, y: y };
         this.x = x;
         this.y = y;
@@ -25,6 +25,10 @@ class Ball {
 
     // creates a matter.js body and adds it to the world
     add(x, y) {
+        // if this method is called to reposition the ball
+        if (this.inWorld) {
+            this.remove();
+        }
         this.body = Bodies.circle(x, y, this.radius, this.options);
         World.add(engine.world, this.body);
         this.x = x;
@@ -114,13 +118,68 @@ function make_colored_balls(x, y) {
 
 function draw_balls() {
     push();
-    if(freeCueBall){
+    if (freeCueBall) { // highlight cue ball if it is free
         stroke("#7af952");
         strokeWeight(3);
     }
     cueBall.draw();
     pop();
+
     redBalls.forEach(ball => ball.draw());
     coloredBalls.forEach(ball => ball.draw());
 }
 
+function balls_to_original_pos() {
+    cueBall.add(cueBall.originalPos.x, cueBall.originalPos.y);
+    redBalls.forEach(ball => { ball.add(ball.originalPos.x, ball.originalPos.y) });
+    coloredBalls.forEach(ball => { ball.add(ball.originalPos.x, ball.originalPos.y) });
+}
+
+function randomize_balls(option) {
+    let xRange = { min: (width / 2) - halfTableWidth + 10, max: (width / 2) + halfTableWidth - 10 };
+    let yRange = { min: (height / 2) - halfTableLength + 10, max: (height / 2) + halfTableLength - 10 };
+    let ballsPos;
+
+    if (option == "red") {
+        coloredBalls.forEach(ball => {
+            ball.add(ball.originalPos.x, ball.originalPos.y);
+        });
+
+        ballsPos = coloredBalls.map(ball => ball.body.position);
+        ballsPos.push(cueBall.body.position);
+    }
+    if (option == "all") {
+        ballsPos = [cueBall.body.position];
+        coloredBalls.forEach(ball => check_and_add_random_ball_pos(ball, ballsPos, xRange, yRange));
+    }
+
+    redBalls.forEach(ball => check_and_add_random_ball_pos(ball, ballsPos, xRange, yRange));
+}
+
+function check_and_add_random_ball_pos(ball, ballsPos, xRange, yRange) {
+    let randomPosX;
+    let randomPosY;
+    let validPos = false;
+    let loopCounter = 0;
+
+    while (!validPos) {
+        randomPosX = random(xRange.min, xRange.max);
+        randomPosY = random(yRange.min, yRange.max);
+        for (let i = 0; i < ballsPos.length; i++) {
+            if (dist(randomPosX, randomPosY, ballsPos[i].x, ballsPos[i].y) < BALLDIA) {
+                break;
+            }
+            if (i == ballsPos.length - 1) {
+                validPos = true;
+            }
+        }
+        loopCounter++;
+        if (loopCounter > 100) {
+            console.log("looped too many times");
+            break;
+        }
+    }
+    ballsPos.push({ x: randomPosX, y: randomPosY });
+    ball.add(randomPosX, randomPosY);
+
+}
