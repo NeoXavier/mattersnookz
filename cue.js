@@ -3,7 +3,7 @@ class Cue{
     constructor(x, y){
         this.x = x;
         this.y = y;
-        this.length = 100;
+        this.length = 300;
         this.width = 10;
         this.inWorld ;
 
@@ -15,8 +15,8 @@ class Cue{
                 fillStyle: "#41230e"
             },
             collisionFilter: {
-                category: 0x0004,
-                mask:0x0002 | 0x0008 
+                category: CUE,
+                mask: CUEBALL | MOUSE 
             }
         };
         this.add(this.x, this.y);
@@ -24,8 +24,13 @@ class Cue{
     
     draw(){
         if (this.inWorld){
-            fill(this.cueBody.render.fillStyle);
-            drawVertices(this.cueBody.vertices);
+            push();
+            translate(this.cueBody.position.x, this.cueBody.position.y);
+            rotate(this.cueBody.angle);
+
+            imageMode(CENTER);
+            image(cueImg, 0, 0, this.length, this.width);
+            pop();
         }
     }
 
@@ -36,7 +41,7 @@ class Cue{
 
     // x, y are the center of the cue ball
     add(x, y){
-        this.cueBody = Bodies.rectangle(x - (this.length/2)-(BALLDIA/2)-1, y, this.length, this.width, this.options);
+        this.cueBody = Bodies.rectangle(x - (this.length/2)-(BALLDIA/2)-5, y, this.length, this.width, this.options);
         this.cueConstraint = Constraint.create({
             pointA:{
                 x: x,
@@ -47,7 +52,7 @@ class Cue{
                 x: this.length/2,
                 y: 0
             },
-            stiffness: 0.2,
+            stiffness: 0.35,
         });
         this.inWorld = true;
         World.add(engine.world, [this.cueBody, this.cueConstraint]); 

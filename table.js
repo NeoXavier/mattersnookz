@@ -61,7 +61,7 @@ class Table {
         rect(this.x - halfTableWidth, this.y + halfTableLength, 20, 20, 0, 0, 0, 10) //bottom left
 
         // Draw green portion of table
-        fill("#4e8734");
+        fill("#4e8834");
         rect(this.x, this.y, TABLEWIDTH, TABLELENGTH, 10);
 
         // Pockets 
@@ -98,7 +98,11 @@ class Table {
             angle: angle,
             isStatic: true,
             render:
-                { fillStyle: '#325f18' }
+                { fillStyle: '#325f18' },
+            collisionFilter:{ 
+                category: TABLE,
+                mask: BALL | CUEBALL 
+            }
         });
         return cushion;
     }
@@ -111,7 +115,11 @@ class Table {
             isSensor: true,
             label: "pocketSensor",
             render:
-                { fillStyle: 'black' }
+                { fillStyle: 'black' },
+            collisionFilter:{ 
+                category: TABLE,
+                mask: BALL | CUEBALL 
+            }
         });
         return pocket;
     }

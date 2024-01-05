@@ -1,5 +1,5 @@
 class Ball {
-    constructor(x, y, radius, label, color, category) {
+    constructor(x, y, radius, label, color, category, mask = CUEBALL ) {
         this.originalPos = { x: x, y: y };
         this.x = x;
         this.y = y;
@@ -13,7 +13,8 @@ class Ball {
                 fillStyle: color
             },
             collisionFilter: {
-                category: category
+                category: category,
+                mask: mask | TABLE | BALL
             }
         }
         this.inWorld;
@@ -72,7 +73,7 @@ function make_red_balls(x, y) {
             }
         }
         for (var i = 0; i < ballCount; i++) {
-            var ball = new Ball(topPosition.x, topPosition.y + (i * BALLDIA), ballRadius, "red ball", "red", 0x0001);
+            var ball = new Ball(topPosition.x, topPosition.y + (i * BALLDIA), ballRadius, "red ball", "red", BALL);
             redBalls.push(ball);
         }
     }
@@ -85,34 +86,40 @@ function make_colored_balls(x, y) {
     var ballRadius = BALLDIA / 2;
 
     // Blue ball placed in the center of the table
-    var blueBall = new Ball(x, y, ballRadius, "color blue ball", "blue", 0x0001);
+    var blueBall = new Ball(x, y, ballRadius, "color blue ball", "blue", BALL);
     colored_balls.push(blueBall);
 
     // Pink ball is placed inbetween blue ball and right cushion 
-    var pinkBall = new Ball(x + (TABLEWIDTH / 4), y, ballRadius, "color pink ball", "pink", 0x0001);
+    var pinkBall = new Ball(x + (TABLEWIDTH / 4), y, ballRadius, "color pink ball", "pink", BALL);
     colored_balls.push(pinkBall);
 
     // Black ball is placed 12.8 inches (approx. 0.09 of table width) from right cushion 
-    var blackBall = new Ball(x + (TABLEWIDTH / 2) - (0.09 * TABLEWIDTH), y, ballRadius, "color black ball", "black", 0x0001);
+    var blackBall = new Ball(x + (TABLEWIDTH / 2) - (0.09 * TABLEWIDTH), y, ballRadius, "color black ball", "black", BALL);
     colored_balls.push(blackBall);
 
     // Brown ball is placed 29 inches (approx. 0.3 table widths) from center of table
-    var brownBall = new Ball(x - (0.3 * TABLEWIDTH), y, ballRadius, "color brown ball", "#c17a44", 0x0001);
+    var brownBall = new Ball(x - (0.3 * TABLEWIDTH), y, ballRadius, "color brown ball", "#c17a44", BALL);
     colored_balls.push(brownBall);
 
     // Green ball is placed above brown ball where the "D" meets the baulk line
-    var greenBall = new Ball(x - (0.3 * TABLEWIDTH), y - (0.08 * TABLEWIDTH), ballRadius, "color green ball", "#7eed63", 0x0001);
+    var greenBall = new Ball(x - (0.3 * TABLEWIDTH), y - (0.08 * TABLEWIDTH), ballRadius, "color green ball", "#7eed63", BALL);
     colored_balls.push(greenBall);
 
     // Yellow ball is placed below brown ball where the "D" meets the baulk line
-    var yellowBall = new Ball(x - (0.3 * TABLEWIDTH), y + (0.08 * TABLEWIDTH), ballRadius, "color yellow ball", "#f3f357", 0x0001);
+    var yellowBall = new Ball(x - (0.3 * TABLEWIDTH), y + (0.08 * TABLEWIDTH), ballRadius, "color yellow ball", "#f3f357", BALL);
     colored_balls.push(yellowBall);
 
     return colored_balls;
 }
 
 function draw_balls() {
+    push();
+    if(freeCueBall){
+        stroke("#7af952");
+        strokeWeight(3);
+    }
     cueBall.draw();
+    pop();
     redBalls.forEach(ball => ball.draw());
     coloredBalls.forEach(ball => ball.draw());
 }
