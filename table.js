@@ -94,9 +94,11 @@ class Table {
         var cushionWidth = (TABLEWIDTH) / 2 - 20;
         var cushion = Bodies.trapezoid(x, y, cushionWidth, 10, 0.1, {
             friction: 0,
+            frictionStatic: 0,
             restitution: 1,
             angle: angle,
             isStatic: true,
+            label: "cushion",
             render:
                 { fillStyle: '#325f18' },
             collisionFilter:{ 

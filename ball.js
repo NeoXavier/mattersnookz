@@ -51,13 +51,14 @@ class Ball {
     }
 }
 
-// 15 red balls in a triangle pattern with the tip pointing left
+// Creates 15 red balls in a triangle pattern with the tip pointing left
 // x and y are the tip of the triangle
 //         *
 //       * *
 //  -> * * *
 //       * *
 //         *
+// Returns an array of red ball objects
 function make_red_balls(x, y) {
     var ballRadius = BALLDIA / 2;
     var redBalls = [];
@@ -84,7 +85,9 @@ function make_red_balls(x, y) {
     return redBalls;
 }
 
-// x, y are the coordinates of the center of the table
+// Creates 6 colored balls
+// Input: x, y are the coordinates of the center of the table
+// Returns an array of colored ball objects
 function make_colored_balls(x, y) {
     var colored_balls = [];
     var ballRadius = BALLDIA / 2;
@@ -116,6 +119,7 @@ function make_colored_balls(x, y) {
     return colored_balls;
 }
 
+// Draw the cue ball, red balls and colored balls
 function draw_balls() {
     push();
     if (freeCueBall) { // highlight cue ball if it is free
@@ -129,8 +133,14 @@ function draw_balls() {
     coloredBalls.forEach(ball => ball.draw());
 }
 
+
+////////////////////////////////////////
+/////// Ball modes /////////////////////
+////////////////////////////////////////
+
 function balls_to_original_pos() {
     cueBall.add(cueBall.originalPos.x, cueBall.originalPos.y);
+    cue.add(cueBall.originalPos.x, cueBall.originalPos.y);
     redBalls.forEach(ball => { ball.add(ball.originalPos.x, ball.originalPos.y) });
     coloredBalls.forEach(ball => { ball.add(ball.originalPos.x, ball.originalPos.y) });
 }
@@ -138,6 +148,8 @@ function balls_to_original_pos() {
 function randomize_balls(option) {
     let xRange = { min: (width / 2) - halfTableWidth + 10, max: (width / 2) + halfTableWidth - 10 };
     let yRange = { min: (height / 2) - halfTableLength + 10, max: (height / 2) + halfTableLength - 10 };
+
+    // Array of ball positions
     let ballsPos;
 
     if (option == "red") {
@@ -156,6 +168,12 @@ function randomize_balls(option) {
     redBalls.forEach(ball => check_and_add_random_ball_pos(ball, ballsPos, xRange, yRange));
 }
 
+// Generates a random position for a ball and checks if it is too close to any other ball
+// Inputs: 
+//  ball : ball object to be repositioned,
+//  ballsPos : array of ball positions,
+//  xRange : object with min and max x values
+//  yRange : object with min and max y values
 function check_and_add_random_ball_pos(ball, ballsPos, xRange, yRange) {
     let randomPosX;
     let randomPosY;
@@ -181,5 +199,4 @@ function check_and_add_random_ball_pos(ball, ballsPos, xRange, yRange) {
     }
     ballsPos.push({ x: randomPosX, y: randomPosY });
     ball.add(randomPosX, randomPosY);
-
 }
